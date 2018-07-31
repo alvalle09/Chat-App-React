@@ -32,7 +32,7 @@ class App extends React.Component {
                 messageLimit: 20,
                 hooks: {
                     onNewMessage: message => {
-                        console.log('message.text: ', message.text);
+                        //console.log('message.text: ', message.text);
                         this.setState({
                             messages: [...this.state.messages, message]
                         })
@@ -43,7 +43,7 @@ class App extends React.Component {
     }
 
     render() {
-        console.log('this.state.messages:', this.state.messages);
+        //console.log('this.state.messages:', this.state.messages);
         return (
             <div className="app">
                 <RoomList />
