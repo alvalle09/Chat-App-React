@@ -17,6 +17,8 @@ class App extends React.Component {
             joinedRooms: []   // rooms currentUser already joined
         }
         this.sendMessage = this.sendMessage.bind(this)
+        this.subscribeToRoom = this.subscribeToRoom.bind(this)
+        this.getRooms = this.getRooms.bind(this)
     }
 
     componentDidMount() {
@@ -32,29 +34,40 @@ class App extends React.Component {
         .then(currentUser => {
             this.currentUser = currentUser // hook currentUser to "this" component 
 
-            this.currentUser.getJoinableRooms()
+            this.getRooms()
+            //this.subscribeToRoom() //not needed cuz loading by clicking on room list
+        })
+        .catch(err => console.log('error on connecting ', err))
+        
+    }
+
+    getRooms() {
+        this.currentUser.getJoinableRooms()
             .then(joinableRooms => {
                 this.setState({
                     joinableRooms, 
                     joinedRooms: this.currentUser.rooms
                 })
             })
-            .catch(err => console.log('error on joinableRooms:', err))
+            .catch(err => console.log('error on joinableRooms:', err))   
+    }
 
-            this.currentUser.subscribeToRoom({
-                roomId: 12741356,
-                messageLimit: 20,
-                hooks: {
-                    onNewMessage: message => {
-                        //console.log('message.text: ', message.text);
-                        this.setState({
-                            messages: [...this.state.messages, message]
-                        })
-                    }
-                }
-            })
-            .catch(err => console.log('error on connecting ', err))
-        })
+    subscribeToRoom(roomId) {
+        // first clean up the state, otherwise messages stack up on each other from different rooms
+        this.setState({ messages: [] })
+        this.currentUser.subscribeToRoom({
+        roomId: roomId,
+        messageLimit: 20,
+        hooks: {
+            onNewMessage: message => {
+                //console.log('message.text: ', message.text);
+                this.setState({
+                    messages: [...this.state.messages, message]
+                })
+            }
+        }
+    })
+
     }
 
     sendMessage(text) {
@@ -68,7 +81,9 @@ class App extends React.Component {
         //console.log('this.state.messages:', this.state.messages);
         return (
             <div className="app">
-                <RoomList rooms={[...this.state.joinableRooms, ...this.state.joinedRooms]}/>
+                <RoomList 
+                    subscribeToRoom={this.subscribeToRoom}
+                    rooms={[...this.state.joinableRooms, ...this.state.joinedRooms]} />
                 <MessageList messages={this.state.messages} />
                 <SendMessageForm sendMessage={this.sendMessage} />
                 <NewRoomForm />
