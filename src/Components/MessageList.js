@@ -1,8 +1,7 @@
 import React from 'react'
 import Message from './Message'
 
-
-/*const DUMMY_DATA = [
+/* const DUMMY_DATA = [
     { senderId: 'Phred',   text: 'Hi! You there?' },
     { senderId: 'janedoe', text: "Yes, How about you?" },
     { senderId: 'Phred',   text: "Good to hear from you" }

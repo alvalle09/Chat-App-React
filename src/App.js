@@ -12,6 +12,7 @@ class App extends React.Component {
     constructor() {
         super() //calls the constructor function of the class extened upon (React.Component) 
         this.state = {
+            roomId: null,
             messages: [],
             joinableRooms: [], // rooms available
             joinedRooms: []   // rooms currentUser already joined
@@ -56,24 +57,32 @@ class App extends React.Component {
         // first clean up the state, otherwise messages stack up on each other from different rooms
         this.setState({ messages: [] })
         this.currentUser.subscribeToRoom({
-        roomId: roomId,
-        messageLimit: 20,
-        hooks: {
-            onNewMessage: message => {
-                //console.log('message.text: ', message.text);
+            roomId: roomId, //passing in roomid to subscribe dynamically
+            messageLimit: 20,
+            hooks: {
+                onNewMessage: message => {
+                    //console.log('message.text: ', message.text);
+                    this.setState({
+                        messages: [...this.state.messages, message]
+                        })
+                    }
+                }
+            })
+            .then(room => {
                 this.setState({
-                    messages: [...this.state.messages, message]
+                    roomId: room.id
                 })
-            }
-        }
-    })
+                this.getRooms()
+                
+            })
+            .catch(err => console.log('error on subscribing to room: ', err))
 
     }
 
     sendMessage(text) {
         this.currentUser.sendMessage({
             text: text,  // in ES6 this can be written as "text," when the key and value are the same
-            roomId: 12741356
+            roomId: this.state.roomId  // get roomId from state
         })
     }
 
@@ -82,6 +91,7 @@ class App extends React.Component {
         return (
             <div className="app">
                 <RoomList 
+                    roomId={this.state.roomId}
                     subscribeToRoom={this.subscribeToRoom}
                     rooms={[...this.state.joinableRooms, ...this.state.joinedRooms]} />
                 <MessageList messages={this.state.messages} />
